@@ -2,6 +2,7 @@
 <?php
 define('USER_AGENT', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36');
 define('API_PREFIX', 'https://api.github.com');
+define('IP', join('.', array(220, mt_rand(50, 250), mt_rand(50, 250), mt_rand(50, 250))));
 
 if (!is_cli())
 {
@@ -32,7 +33,7 @@ print_r($result);
 
 function get_following($username)
 {
-    $array = array();
+    $array  = array();
     $object = request(API_PREFIX . '/users/' . $username . '/following');
     foreach ($object as $value)
     {
@@ -62,6 +63,9 @@ function request($url)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_USERAGENT, USER_AGENT);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'X-FORWARDED-FOR:' . IP, 'CLIENT-IP:' . IP,
+    ));
     $result = curl_exec($ch);
     curl_close($ch);
     return json_decode($result);
@@ -78,6 +82,9 @@ function get_status_code($url)
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
     curl_setopt($ch, CURLOPT_USERAGENT, USER_AGENT);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'X-FORWARDED-FOR:' . IP, 'CLIENT-IP:' . IP,
+    ));
     curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
